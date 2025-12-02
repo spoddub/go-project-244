@@ -5,9 +5,14 @@ import (
 )
 
 func formatJSON(tree []Node) (string, error) {
-	data, err := json.MarshalIndent(tree, "", "  ")
+	wrapper := map[string]any{
+		"diff": tree,
+	}
+
+	data, err := json.MarshalIndent(wrapper, "", "  ")
 	if err != nil {
 		return "", err
 	}
+
 	return string(data), nil
 }

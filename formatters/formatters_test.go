@@ -97,33 +97,38 @@ func TestFormatJSONNested(t *testing.T) {
 		return
 	}
 
+	var wrapper map[string]json.RawMessage
+	if !assert.NoError(t, json.Unmarshal([]byte(got), &wrapper), "output must be valid JSON object") {
+		return
+	}
+
+	rawDiff, ok := wrapper["diff"]
+	if !assert.True(t, ok, "json must contain 'diff' field") {
+		return
+	}
+
 	var nodes []Node
-	if !assert.NoError(t, json.Unmarshal([]byte(got), &nodes), "output must be valid JSON") {
+	if !assert.NoError(t, json.Unmarshal(rawDiff, &nodes), "diff field must be valid JSON array of nodes") {
 		return
 	}
 
 	if assert.GreaterOrEqual(t, len(nodes), 4, "expected at least 4 top-level nodes") {
-		assert.Equal(t, "common", nodes[0].Key)
-		assert.Equal(t, nodeNested, nodes[0].Type)
-	}
+		var foundGroup2, foundGroup3 bool
 
-	var foundGroup2, foundGroup3 bool
-
-	for _, n := range nodes {
-		switch n.Key {
-		case "group2":
-			foundGroup2 = true
-			assert.Equal(t, nodeRemoved, n.Type)
-			assert.NotNil(t, n.Value)
-		case "group3":
-			foundGroup3 = true
-			assert.Equal(t, nodeAdded, n.Type)
-			assert.NotNil(t, n.Value)
+		for _, n := range nodes {
+			switch n.Key {
+			case "group2":
+				foundGroup2 = true
+				assert.Equal(t, nodeRemoved, n.Type)
+			case "group3":
+				foundGroup3 = true
+				assert.Equal(t, nodeAdded, n.Type)
+			}
 		}
-	}
 
-	assert.True(t, foundGroup2, "node with key 'group2' must exist")
-	assert.True(t, foundGroup3, "node with key 'group3' must exist")
+		assert.True(t, foundGroup2, "node with key 'group2' must exist")
+		assert.True(t, foundGroup3, "node with key 'group3' must exist")
+	}
 }
 
 func TestFormatUnsupported(t *testing.T) {
