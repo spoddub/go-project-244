@@ -10,6 +10,8 @@ func Format(data1, data2 map[string]any, format string) (string, error) {
 		return formatStylish(tree), nil
 	case "plain":
 		return formatPlain(tree), nil
+	case "json":
+		return formatJSON(tree)
 	default:
 		return "", fmt.Errorf("unsupported format %q", format)
 	}

@@ -1,6 +1,7 @@
 package formatters
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -75,6 +76,54 @@ func TestFormatPlainNested(t *testing.T) {
 	got = strings.TrimSpace(got)
 
 	assert.Equal(t, expected, got, "plain formatter output mismatch")
+}
+
+func TestFormatJSONNested(t *testing.T) {
+	file1 := fixturePath("file1.json")
+	file2 := fixturePath("file2.json")
+
+	data1, err := parsers.Parse(file1)
+	if !assert.NoError(t, err, "Parse should not return error for file1.json") {
+		return
+	}
+
+	data2, err := parsers.Parse(file2)
+	if !assert.NoError(t, err, "Parse should not return error for file2.json") {
+		return
+	}
+
+	got, err := Format(data1, data2, "json")
+	if !assert.NoError(t, err, "Format (json) returned error") {
+		return
+	}
+
+	var nodes []Node
+	if !assert.NoError(t, json.Unmarshal([]byte(got), &nodes), "output must be valid JSON") {
+		return
+	}
+
+	if assert.GreaterOrEqual(t, len(nodes), 4, "expected at least 4 top-level nodes") {
+		assert.Equal(t, "common", nodes[0].Key)
+		assert.Equal(t, nodeNested, nodes[0].Type)
+	}
+
+	var foundGroup2, foundGroup3 bool
+
+	for _, n := range nodes {
+		switch n.Key {
+		case "group2":
+			foundGroup2 = true
+			assert.Equal(t, nodeRemoved, n.Type)
+			assert.NotNil(t, n.Value)
+		case "group3":
+			foundGroup3 = true
+			assert.Equal(t, nodeAdded, n.Type)
+			assert.NotNil(t, n.Value)
+		}
+	}
+
+	assert.True(t, foundGroup2, "node with key 'group2' must exist")
+	assert.True(t, foundGroup3, "node with key 'group3' must exist")
 }
 
 func TestFormatUnsupported(t *testing.T) {

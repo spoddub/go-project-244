@@ -1,3 +1,4 @@
+// formatters/diff.go
 package formatters
 
 import (
@@ -9,19 +10,19 @@ type nodeType string
 
 const (
 	nodeAdded     nodeType = "added"
-	nodeRemoved   nodeType = "removed"
+	nodeRemoved   nodeType = "deleted"
 	nodeUnchanged nodeType = "unchanged"
-	nodeUpdated   nodeType = "updated"
-	nodeNested    nodeType = "nested"
+	nodeUpdated   nodeType = "changed"
+	nodeNested    nodeType = "nest"
 )
 
 type Node struct {
-	Key      string
-	Type     nodeType
-	Value    any
-	OldValue any
-	NewValue any
-	Children []Node
+	Key      string   `json:"key"`
+	Type     nodeType `json:"type"`
+	Value    any      `json:"value,omitempty"`
+	OldValue any      `json:"oldValue,omitempty"`
+	NewValue any      `json:"newValue,omitempty"`
+	Children []Node   `json:"children,omitempty"`
 }
 
 func buildDiff(data1, data2 map[string]any) []Node {
