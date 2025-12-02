@@ -4,7 +4,7 @@
 
 ## GenDiff
 
-`GenDiff` is a small training CLI utility written in Go that compares two configuration files (JSON or YAML) and shows the difference between them.  
+`GenDiff` is a small CLI utility written in Go that compares two configuration files (JSON or YAML) and shows the difference between them.  
 It supports nested structures and multiple output formats:
 
 - **stylish** (default) - human-friendly tree diff
